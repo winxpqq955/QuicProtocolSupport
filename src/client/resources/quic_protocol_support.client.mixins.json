@@ -1,0 +1,14 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "industries._5505.quic_protocol_support.mixin.client",
+	"compatibilityLevel": "JAVA_17",
+	"client": [
+		"AddressResolverMixin",
+		"ClientConnectionMixin",
+		"ServerAddressMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

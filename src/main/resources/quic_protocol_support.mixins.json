@@ -1,0 +1,16 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "industries._5505.quic_protocol_support.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"mixins": [
+		"ClientConnectionAccessor",
+		"ClientConnectionMixin",
+		"MinecraftDedicatedServerMixin",
+		"ServerNetworkIoAccessor",
+		"ServerPropertiesHandlerMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
