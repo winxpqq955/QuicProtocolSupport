@@ -5,18 +5,13 @@ package industries._5505.quic_protocol_support.client
 import industries._5505.quic_protocol_support.APPLICATION_PROTOCOL
 import industries._5505.quic_protocol_support.mixin.ClientConnectionAccessor
 import io.netty.bootstrap.Bootstrap
-import io.netty.channel.Channel
 import io.netty.channel.ChannelFuture
 import io.netty.channel.ChannelInboundHandlerAdapter
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.epoll.Epoll
 import io.netty.channel.epoll.EpollDatagramChannel
 import io.netty.channel.socket.nio.NioDatagramChannel
-import io.netty.handler.timeout.ReadTimeoutHandler
-import io.netty.incubator.codec.quic.QuicChannel
-import io.netty.incubator.codec.quic.QuicClientCodecBuilder
-import io.netty.incubator.codec.quic.QuicSslContextBuilder
-import io.netty.incubator.codec.quic.QuicStreamType
+import io.netty.incubator.codec.quic.*
 import net.minecraft.network.ClientConnection
 import net.minecraft.network.NetworkSide
 import java.net.InetSocketAddress
@@ -33,7 +28,7 @@ fun connectUsingQuic(address: InetSocketAddress, useEpollIfAvailable: Boolean, c
 
 	val codec = QuicClientCodecBuilder()
 		.sslContext(context)
-		.maxIdleTimeout(5000, TimeUnit.SECONDS)
+		.maxIdleTimeout(30, TimeUnit.SECONDS)
 		.initialMaxData(10000000)
 		.initialMaxStreamDataBidirectionalLocal(1000000)
 		.build()
@@ -51,11 +46,10 @@ fun connectUsingQuic(address: InetSocketAddress, useEpollIfAvailable: Boolean, c
 		.remoteAddress(address)
 		.connect()
 		.get()
-		.createStream(QuicStreamType.BIDIRECTIONAL, object : ChannelInitializer<Channel?>() {
-			override fun initChannel(ch: Channel?) {
+		.createStream(QuicStreamType.BIDIRECTIONAL, object : ChannelInitializer<QuicStreamChannel>() {
+			override fun initChannel(channel: QuicStreamChannel) {
 				(connection as ClientConnectionAccessor).setEncrypted(true)
-				val pipeline = ch!!.pipeline()
-					.addLast("timeout", ReadTimeoutHandler(30))
+				val pipeline = channel.pipeline()
 				ClientConnection.addHandlers(pipeline, NetworkSide.CLIENTBOUND)
 				pipeline.addLast("packet_handler", connection)
 			}

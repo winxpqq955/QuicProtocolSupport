@@ -10,7 +10,6 @@ import io.netty.channel.*
 import io.netty.channel.epoll.Epoll
 import io.netty.channel.epoll.EpollDatagramChannel
 import io.netty.channel.socket.nio.NioDatagramChannel
-import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.incubator.codec.quic.QuicPathEvent
 import io.netty.incubator.codec.quic.QuicServerCodecBuilder
 import io.netty.incubator.codec.quic.QuicSslContextBuilder
@@ -54,11 +53,11 @@ fun startQuicListener(
 		.applicationProtocols(APPLICATION_PROTOCOL)
 		.build()
 
-	val inheritAddresses = WeakHashMap<Channel, SocketAddress?>()
+	val parentChannelAddresses = WeakHashMap<Channel, SocketAddress>()
 
 	val codec = QuicServerCodecBuilder()
 		.sslContext(context)
-		.maxIdleTimeout(5000, TimeUnit.SECONDS)
+		.maxIdleTimeout(30, TimeUnit.SECONDS)
 		.initialMaxData(10000000)
 		.initialMaxStreamDataBidirectionalLocal(1000000)
 		.initialMaxStreamDataBidirectionalRemote(1000000)
@@ -67,17 +66,17 @@ fun startQuicListener(
 		.tokenHandler(Blake3TokenHandler(ByteArray(32).apply(SecureRandom()::nextBytes)))
 		.connectionIdAddressGenerator(Blake3ConnectionIdGenerator(ByteArray(32).apply(SecureRandom()::nextBytes)))
 		.handler(object : ChannelInboundHandlerAdapter() {
-			override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
-				if (evt is QuicPathEvent) {
-					val newAddress = evt.remote()
-					inheritAddresses[ctx.channel()] = newAddress
+			override fun userEventTriggered(context: ChannelHandlerContext, event: Any) {
+				if (event is QuicPathEvent.New || event is QuicPathEvent.PeerMigrated) {
+					val newAddress = event.remote()
+					parentChannelAddresses[context.channel()] = newAddress
 
 					for (connection in connections) {
 						val oldAddress = connection.address
 						val accessor = connection as ClientConnectionAccessor
 
 						if (accessor.getChannel() is QuicStreamChannel
-							&& accessor.getChannel().parent() == ctx.channel()
+							&& accessor.getChannel().parent() == context.channel()
 							&& !newAddress.equals(oldAddress)
 						) {
 							accessor.setAddress(newAddress)
@@ -86,21 +85,20 @@ fun startQuicListener(
 					}
 				}
 
-				ctx.fireUserEventTriggered(evt)
+				context.fireUserEventTriggered(event)
 			}
 
-			override fun channelInactive(ctx: ChannelHandlerContext) {
-				inheritAddresses -= ctx.channel()
+			override fun channelInactive(context: ChannelHandlerContext) {
+				parentChannelAddresses -= context.channel()
 
-				ctx.fireChannelInactive()
+				context.fireChannelInactive()
 			}
 
 			override fun isSharable() = true
 		})
-		.streamHandler(object : ChannelInitializer<Channel>() {
-			override fun initChannel(channel: Channel) {
+		.streamHandler(object : ChannelInitializer<QuicStreamChannel>() {
+			override fun initChannel(channel: QuicStreamChannel) {
 				val channelPipeline = channel.pipeline()
-					.addLast("timeout", ReadTimeoutHandler(30))
 				ClientConnection.addHandlers(channelPipeline, NetworkSide.SERVERBOUND)
 
 				val rateLimit = server.rateLimit
@@ -111,7 +109,7 @@ fun startQuicListener(
 				channelPipeline.addLast("packet_handler", clientConnection)
 				clientConnection.packetListener = ServerHandshakeNetworkHandler(server, clientConnection)
 
-				inheritAddresses[channel.parent()]?.also { (clientConnection as ClientConnectionAccessor).setAddress(it) }
+				parentChannelAddresses[channel.parent()]?.also { (clientConnection as ClientConnectionAccessor).setAddress(it) }
 			}
 		})
 		.build()

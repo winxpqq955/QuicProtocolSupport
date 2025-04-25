@@ -40,7 +40,7 @@ public abstract class MinecraftDedicatedServerMixin extends MinecraftServer {
 	private void setupServer(CallbackInfoReturnable<Boolean> callbackInfoReturnable) throws IOException {
 		var properties = (QuicServerProperties) getProperties();
 		if (properties.getQuicPort() != -1) {
-			LOGGER.info("Starting Minecraft over QUIC on {}:{}", getServerIp().isEmpty() ? "*" : getServerIp(), properties.getQuicPort());
+			LOGGER.info("Starting Minecraft server (QUIC) on {}:{}", getServerIp().isEmpty() ? "*" : getServerIp(), properties.getQuicPort());
 
 			InetAddress address = null;
 			if (!getServerIp().isEmpty()) {
