@@ -40,15 +40,15 @@ dependencies {
 	modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
 	modImplementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
 	// QUIC
-	include("io.netty.incubator:netty-incubator-codec-classes-quic:0.0.71.Final")
-	implementation("io.netty.incubator:netty-incubator-codec-classes-quic:0.0.71.Final")
+	include("io.netty.incubator:netty-incubator-codec-classes-quic:${project.property("netty_quic_version")}")
+	implementation("io.netty.incubator:netty-incubator-codec-classes-quic:${project.property("netty_quic_version")}")
 	for (classifier in arrayOf("linux-aarch_64", "linux-x86_64", "osx-aarch_64", "osx-x86_64", "windows-x86_64")) {
-		include("io.netty.incubator:netty-incubator-codec-native-quic:0.0.71.Final:${classifier}")
+		include("io.netty.incubator:netty-incubator-codec-native-quic:${project.property("netty_quic_version")}:${classifier}")
 	}
-	runtimeOnly("io.netty.incubator:netty-incubator-codec-native-quic:0.0.71.Final:windows-x86_64")
+	runtimeOnly("io.netty.incubator:netty-incubator-codec-native-quic:${project.property("netty_quic_version")}:windows-x86_64")
 	// hashing
-	include("commons-codec:commons-codec:1.18.0")
-	implementation("commons-codec:commons-codec:1.18.0")
+	include("commons-codec:commons-codec:${project.property("commons_codec_version")}")
+	implementation("commons-codec:commons-codec:${project.property("commons_codec_version")}")
 }
 
 tasks.processResources {

@@ -21,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Proxy;
 
 @Mixin(MinecraftDedicatedServer.class)
@@ -38,17 +39,20 @@ public abstract class MinecraftDedicatedServerMixin extends MinecraftServer {
 
 	@Inject(method = "setupServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerNetworkIo;bind(Ljava/net/InetAddress;I)V", shift = At.Shift.AFTER))
 	private void setupServer(CallbackInfoReturnable<Boolean> callbackInfoReturnable) throws IOException {
-		var properties = (QuicServerProperties) getProperties();
-		if (properties.getQuicPort() != -1) {
-			LOGGER.info("Starting Minecraft server (QUIC) on {}:{}", getServerIp().isEmpty() ? "*" : getServerIp(), properties.getQuicPort());
+		var quicPort = ((QuicServerProperties) getProperties()).getQuicPort();
+		if (quicPort != -1) {
+			LOGGER.info("Starting Minecraft server (QUIC) on {}:{}", getServerIp().isEmpty() ? "*" : getServerIp(), quicPort);
 
-			InetAddress address = null;
-			if (!getServerIp().isEmpty()) {
-				address = InetAddress.getByName(getServerIp());
-			}
-
-			var accessor = (ServerNetworkIoAccessor) getNetworkIo();
-			QuicListener.startQuicListener(this, address, properties, accessor.getChannels(), accessor.getConnections());
+			var networkIo = (ServerNetworkIoAccessor) getNetworkIo();
+			QuicListener.startQuicListener(
+				(MinecraftDedicatedServer) (Object) this,
+				new InetSocketAddress(
+					getServerIp().isEmpty() ? null : InetAddress.getByName(getServerIp()),
+					quicPort
+				),
+				networkIo.getChannels(),
+				networkIo.getConnections()
+			);
 		}
 	}
 }

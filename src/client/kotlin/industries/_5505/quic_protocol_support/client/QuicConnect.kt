@@ -29,8 +29,8 @@ fun connectUsingQuic(address: InetSocketAddress, useEpollIfAvailable: Boolean, c
 	val codec = QuicClientCodecBuilder()
 		.sslContext(context)
 		.maxIdleTimeout(30, TimeUnit.SECONDS)
-		.initialMaxData(10000000)
-		.initialMaxStreamDataBidirectionalLocal(1000000)
+		.initialMaxData(16_777_216) // 16 MiB
+		.initialMaxStreamDataBidirectionalLocal(16_777_216) // 16 MiB
 		.build()
 
 	val channel = Bootstrap()
