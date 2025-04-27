@@ -10,10 +10,7 @@ import io.netty.channel.*
 import io.netty.channel.epoll.Epoll
 import io.netty.channel.epoll.EpollDatagramChannel
 import io.netty.channel.socket.nio.NioDatagramChannel
-import io.netty.incubator.codec.quic.QuicPathEvent
-import io.netty.incubator.codec.quic.QuicServerCodecBuilder
-import io.netty.incubator.codec.quic.QuicSslContextBuilder
-import io.netty.incubator.codec.quic.QuicStreamChannel
+import io.netty.incubator.codec.quic.*
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.network.ClientConnection
 import net.minecraft.network.NetworkSide

@@ -6,6 +6,7 @@
 	"client": [
 		"AddressResolverMixin",
 		"ClientConnectionMixin",
+		"RedirectResolverMixin",
 		"ServerAddressMixin"
 	],
 	"injectors": {
