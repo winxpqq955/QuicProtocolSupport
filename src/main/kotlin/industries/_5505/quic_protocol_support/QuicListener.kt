@@ -53,9 +53,9 @@ fun startQuicListener(
 	val codec = QuicServerCodecBuilder()
 		.sslContext(context)
 		.initialMaxStreamsBidirectional(server.properties.maxPlayers.toLong())
-		.maxIdleTimeout(30, TimeUnit.SECONDS)
-		.initialMaxData(4_194_304) // 4 MiB
-		.initialMaxStreamDataBidirectionalRemote(4_194_304) // 4 MiB
+		.maxIdleTimeout(5, TimeUnit.SECONDS)
+		.initialMaxData(16_777_216) // 16 MiB
+		.initialMaxStreamDataBidirectionalRemote(16_777_216) // 16 MiB
 		.tokenHandler(Blake3TokenHandler(ByteArray(32).apply(SecureRandom()::nextBytes)))
 		.connectionIdAddressGenerator(Blake3ConnectionIdGenerator(ByteArray(32).apply(SecureRandom()::nextBytes)))
 		.handler(object : ChannelInboundHandlerAdapter() {
