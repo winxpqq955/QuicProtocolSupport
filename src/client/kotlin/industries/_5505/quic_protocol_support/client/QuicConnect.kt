@@ -17,11 +17,13 @@ import net.minecraft.network.NetworkSide
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 
+const val MAX_DATA: Long = 33_554_432 // 32 MiB
+
 fun connectUsingQuic(address: InetSocketAddress, useEpollIfAvailable: Boolean, connection: ClientConnection): ChannelFuture {
 	val useEpoll = Epoll.isAvailable() && useEpollIfAvailable
 
 	val context = QuicSslContextBuilder.forClient()
-		// uncomment the line below if you are using self-signed certificates
+		// uncomment the line below if you want to accept self-signed certificates
 		//.trustManager(io.netty.handler.ssl.util.InsecureTrustManagerFactory.INSTANCE)
 		.applicationProtocols(APPLICATION_PROTOCOL)
 		.build()
@@ -29,8 +31,9 @@ fun connectUsingQuic(address: InetSocketAddress, useEpollIfAvailable: Boolean, c
 	val codec = QuicClientCodecBuilder()
 		.sslContext(context)
 		.maxIdleTimeout(5, TimeUnit.SECONDS)
-		.initialMaxData(16_777_216) // 16 MiB
-		.initialMaxStreamDataBidirectionalLocal(16_777_216) // 16 MiB
+		.initialMaxData(MAX_DATA)
+		.initialMaxStreamDataBidirectionalLocal(MAX_DATA)
+		.congestionControlAlgorithm(QuicCongestionControlAlgorithm.BBR2)
 		.build()
 
 	val channel = Bootstrap()

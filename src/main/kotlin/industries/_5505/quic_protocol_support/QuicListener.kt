@@ -25,6 +25,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 const val APPLICATION_PROTOCOL = "minecraft"
+const val MAX_DATA: Long = 8_388_608 // 8 MiB
 
 private val logger = LogManager.getLogger()
 
@@ -52,10 +53,11 @@ fun startQuicListener(
 
 	val codec = QuicServerCodecBuilder()
 		.sslContext(context)
-		.initialMaxStreamsBidirectional(server.properties.maxPlayers.toLong())
+		.initialMaxStreamsBidirectional(1)
 		.maxIdleTimeout(5, TimeUnit.SECONDS)
-		.initialMaxData(16_777_216) // 16 MiB
-		.initialMaxStreamDataBidirectionalRemote(16_777_216) // 16 MiB
+		.initialMaxData(MAX_DATA)
+		.initialMaxStreamDataBidirectionalRemote(MAX_DATA)
+		.congestionControlAlgorithm(QuicCongestionControlAlgorithm.BBR2)
 		.tokenHandler(Blake3TokenHandler(ByteArray(32).apply(SecureRandom()::nextBytes)))
 		.connectionIdAddressGenerator(Blake3ConnectionIdGenerator(ByteArray(32).apply(SecureRandom()::nextBytes)))
 		.handler(object : ChannelInboundHandlerAdapter() {
@@ -112,5 +114,5 @@ fun startQuicListener(
 		.channel(if (useEpoll) EpollDatagramChannel::class.java else NioDatagramChannel::class.java)
 		.handler(codec)
 		.bind(socketAddress)
-		.syncUninterruptibly()
+		.sync()
 }
