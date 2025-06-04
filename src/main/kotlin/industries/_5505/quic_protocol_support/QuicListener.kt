@@ -53,11 +53,13 @@ fun startQuicListener(
 
 	val codec = QuicServerCodecBuilder()
 		.sslContext(context)
-		.initialMaxStreamsBidirectional(1)
 		.maxIdleTimeout(5, TimeUnit.SECONDS)
 		.initialMaxData(MAX_DATA)
+		.initialMaxStreamsBidirectional(1)
 		.initialMaxStreamDataBidirectionalRemote(MAX_DATA)
-		.congestionControlAlgorithm(QuicCongestionControlAlgorithm.BBR2)
+		.congestionControlAlgorithm(QuicCongestionControlAlgorithm.CUBIC)
+		.maxSendUdpPayloadSize(1350)
+		.activeMigration(false)
 		.tokenHandler(Blake3TokenHandler(ByteArray(32).apply(SecureRandom()::nextBytes)))
 		.connectionIdAddressGenerator(Blake3ConnectionIdGenerator(ByteArray(32).apply(SecureRandom()::nextBytes)))
 		.handler(object : ChannelInboundHandlerAdapter() {

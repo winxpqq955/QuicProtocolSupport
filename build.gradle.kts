@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-	kotlin("jvm") version "2.1.20"
+	kotlin("jvm") version "2.1.21"
 	id("fabric-loom") version "1.10-SNAPSHOT"
 }
 
@@ -31,9 +31,6 @@ loom {
 
 repositories {
 	mavenCentral()
-	flatDir {
-		dirs("libs")
-	}
 }
 
 dependencies {
@@ -45,7 +42,7 @@ dependencies {
 	// QUIC
 	include("io.netty.incubator:netty-incubator-codec-classes-quic:${project.property("netty_quic_version")}")
 	implementation("io.netty.incubator:netty-incubator-codec-classes-quic:${project.property("netty_quic_version")}")
-	for (classifier in arrayOf("linux-aarch_64", "linux-x86_64", "windows-x86_64")) {
+	for (classifier in arrayOf("linux-aarch_64", "linux-x86_64", "osx-aarch_64", "osx-x86_64", "windows-x86_64")) {
 		include("io.netty.incubator:netty-incubator-codec-native-quic:${project.property("netty_quic_version")}:${classifier}")
 	}
 	runtimeOnly("io.netty.incubator:netty-incubator-codec-native-quic:${project.property("netty_quic_version")}:windows-x86_64")

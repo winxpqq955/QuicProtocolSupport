@@ -33,7 +33,8 @@ fun connectUsingQuic(address: InetSocketAddress, useEpollIfAvailable: Boolean, c
 		.maxIdleTimeout(5, TimeUnit.SECONDS)
 		.initialMaxData(MAX_DATA)
 		.initialMaxStreamDataBidirectionalLocal(MAX_DATA)
-		.congestionControlAlgorithm(QuicCongestionControlAlgorithm.BBR2)
+		.congestionControlAlgorithm(QuicCongestionControlAlgorithm.CUBIC)
+		.maxSendUdpPayloadSize(1350)
 		.build()
 
 	val channel = Bootstrap()
