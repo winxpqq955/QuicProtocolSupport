@@ -32,7 +32,7 @@ public class ClientConnectionMixin {
 		}
 	}
 
-	@Redirect(method = "disconnect", at = @At(value = "FIELD", target = "Lnet/minecraft/network/ClientConnection;channel:Lio/netty/channel/Channel;"))
+	@Redirect(method = "disconnect", at = @At(value = "FIELD", target = "Lnet/minecraft/network/ClientConnection;channel:Lio/netty/channel/Channel;", ordinal = 1))
 	private Channel disconnectGetChannel(ClientConnection instance) {
 		if (channel instanceof QuicStreamChannel) {
 			return channel.parent();
