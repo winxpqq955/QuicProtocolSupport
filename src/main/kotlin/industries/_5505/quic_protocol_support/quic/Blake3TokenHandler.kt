@@ -37,7 +37,7 @@ class Blake3TokenHandler(key: ByteArray) : QuicTokenHandler {
 	}
 
 	private fun hash(address: InetSocketAddress, dcid: ByteBuf, windowId: Long): ByteArray {
-		require(dcid.readableBytes() <= MAX_CONNECTION_ID_LENGTH) {
+		require(dcid.readableBytes() in 1..MAX_CONNECTION_ID_LENGTH) {
 			"connection ID may not be longer than $MAX_CONNECTION_ID_LENGTH bytes"
 		}
 

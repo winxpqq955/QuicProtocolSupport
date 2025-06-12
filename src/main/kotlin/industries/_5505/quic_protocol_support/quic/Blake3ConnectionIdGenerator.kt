@@ -14,8 +14,7 @@ class Blake3ConnectionIdGenerator(key: ByteArray) : QuicConnectionIdGenerator {
 	}
 
 	override fun newId(input: ByteBuffer, length: Int): ByteBuffer {
-		require(length > 0) { "length: $length (expected: > 0)" }
-		require(length in 0..maxConnectionIdLength()) { "length: $length (expected: 0-${maxConnectionIdLength()})" }
+		require(length in 1..MAX_CONNECTION_ID_LENGTH) { "length: $length (expected between 1 and $MAX_CONNECTION_ID_LENGTH)" }
 
 		hash.reset()
 		if (input.hasArray()) {
@@ -25,6 +24,7 @@ class Blake3ConnectionIdGenerator(key: ByteArray) : QuicConnectionIdGenerator {
 			input.get(buffer)
 			hash.update(buffer)
 		}
+
 		return ByteBuffer.wrap(hash.doFinalize(length))
 	}
 

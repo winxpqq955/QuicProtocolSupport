@@ -25,8 +25,8 @@ public class ClientConnectionMixin {
 
 	@Redirect(method = "channelActive", at = @At(value = "FIELD", target = "Lnet/minecraft/network/ClientConnection;address:Ljava/net/SocketAddress;"))
 	private void channelActiveSetAddress(ClientConnection instance, SocketAddress value) {
-		if (channel instanceof QuicStreamChannel) {
-			address = channel.parent().remoteAddress();
+		if (channel instanceof QuicStreamChannel quicStreamChannel) {
+			address = quicStreamChannel.parent().remoteSocketAddress();
 		} else {
 			address = value;
 		}

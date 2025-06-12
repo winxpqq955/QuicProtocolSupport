@@ -6,7 +6,10 @@ import industries._5505.quic_protocol_support.mixin.ClientConnectionAccessor
 import industries._5505.quic_protocol_support.quic.Blake3ConnectionIdGenerator
 import industries._5505.quic_protocol_support.quic.Blake3TokenHandler
 import io.netty.bootstrap.Bootstrap
-import io.netty.channel.*
+import io.netty.channel.ChannelFuture
+import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.ChannelInboundHandlerAdapter
+import io.netty.channel.ChannelInitializer
 import io.netty.channel.epoll.Epoll
 import io.netty.channel.epoll.EpollDatagramChannel
 import io.netty.channel.socket.nio.NioDatagramChannel
@@ -19,9 +22,7 @@ import net.minecraft.server.dedicated.MinecraftDedicatedServer
 import net.minecraft.server.network.ServerHandshakeNetworkHandler
 import org.apache.logging.log4j.LogManager
 import java.net.InetSocketAddress
-import java.net.SocketAddress
 import java.security.SecureRandom
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 const val APPLICATION_PROTOCOL = "minecraft"
@@ -49,8 +50,6 @@ fun startQuicListener(
 		.applicationProtocols(APPLICATION_PROTOCOL)
 		.build()
 
-	val parentChannelAddresses = WeakHashMap<Channel, SocketAddress>()
-
 	val codec = QuicServerCodecBuilder()
 		.sslContext(context)
 		.maxIdleTimeout(5, TimeUnit.SECONDS)
@@ -63,12 +62,10 @@ fun startQuicListener(
 		.resetTokenGenerator(QuicResetTokenGenerator.signGenerator())
 		.handler(object : ChannelInboundHandlerAdapter() {
 			override fun userEventTriggered(context: ChannelHandlerContext, event: Any) {
-				if (event is QuicPathEvent.New || event is QuicPathEvent.PeerMigrated) {
-					val newAddress = event.remote()
-					parentChannelAddresses[context.channel()] = newAddress
-
+				if (event is QuicPathEvent.PeerMigrated) {
 					for (connection in connections) {
 						val oldAddress = connection.address
+						val newAddress = event.remote()
 						val accessor = connection as ClientConnectionAccessor
 
 						if (accessor.getChannel() is QuicStreamChannel
@@ -82,12 +79,6 @@ fun startQuicListener(
 				}
 
 				context.fireUserEventTriggered(event)
-			}
-
-			override fun channelInactive(context: ChannelHandlerContext) {
-				parentChannelAddresses -= context.channel()
-
-				context.fireChannelInactive()
 			}
 
 			override fun isSharable() = true
@@ -104,8 +95,6 @@ fun startQuicListener(
 
 				channelPipeline.addLast("packet_handler", clientConnection)
 				clientConnection.packetListener = ServerHandshakeNetworkHandler(server, clientConnection)
-
-				parentChannelAddresses[channel.parent()]?.also { (clientConnection as ClientConnectionAccessor).setAddress(it) }
 			}
 		})
 		.build()
