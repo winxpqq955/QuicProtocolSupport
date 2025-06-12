@@ -1,7 +1,6 @@
 package industries._5505.quic_protocol_support.mixin;
 
 import io.netty.channel.Channel;
-import io.netty.incubator.codec.quic.QuicStreamAddress;
 import io.netty.incubator.codec.quic.QuicStreamChannel;
 import net.minecraft.network.ClientConnection;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,8 +24,10 @@ public class ClientConnectionMixin {
 	private boolean encrypted;
 
 	@Redirect(method = "channelActive", at = @At(value = "FIELD", target = "Lnet/minecraft/network/ClientConnection;address:Ljava/net/SocketAddress;"))
-	private void channelActiveIgnoreQuic(ClientConnection instance, SocketAddress value) {
-		if (!(value instanceof QuicStreamAddress)) {
+	private void channelActiveSetAddress(ClientConnection instance, SocketAddress value) {
+		if (channel instanceof QuicStreamChannel) {
+			address = channel.parent().remoteAddress();
+		} else {
 			address = value;
 		}
 	}
