@@ -25,7 +25,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 const val APPLICATION_PROTOCOL = "minecraft"
-const val MAX_DATA: Long = 8_388_608 // 8 MiB
+private const val MAX_DATA: Long = 2_097_152 // 2 MiB
 
 private val logger = LogManager.getLogger()
 

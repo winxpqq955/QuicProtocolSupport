@@ -17,7 +17,7 @@ import net.minecraft.network.NetworkSide
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 
-const val MAX_DATA: Long = 33_554_432 // 32 MiB
+private const val MAX_DATA: Long = 2_097_152 // 2 MiB
 
 fun connectUsingQuic(address: InetSocketAddress, useEpollIfAvailable: Boolean, connection: ClientConnection): ChannelFuture {
 	val useEpoll = Epoll.isAvailable() && useEpollIfAvailable
