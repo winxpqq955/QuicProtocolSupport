@@ -7,8 +7,8 @@
 		"ClientConnectionAccessor",
 		"ClientConnectionMixin",
 		"MinecraftDedicatedServerMixin",
-		"ServerNetworkIoAccessor",
 		"MinecraftServerMixin",
+		"ServerNetworkIoAccessor",
 		"ServerPropertiesHandlerMixin"
 	],
 	"injectors": {

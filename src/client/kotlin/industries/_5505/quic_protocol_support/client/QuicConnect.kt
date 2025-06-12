@@ -33,8 +33,7 @@ fun connectUsingQuic(address: InetSocketAddress, useEpollIfAvailable: Boolean, c
 		.maxIdleTimeout(5, TimeUnit.SECONDS)
 		.initialMaxData(MAX_DATA)
 		.initialMaxStreamDataBidirectionalLocal(MAX_DATA)
-		.congestionControlAlgorithm(QuicCongestionControlAlgorithm.CUBIC)
-		.maxSendUdpPayloadSize(1350)
+		.congestionControlAlgorithm(QuicCongestionControlAlgorithm.BBR2)
 		.build()
 
 	val channel = Bootstrap()
@@ -59,5 +58,6 @@ fun connectUsingQuic(address: InetSocketAddress, useEpollIfAvailable: Boolean, c
 			}
 		})
 		.get()
+		.parent()
 		.newSucceededFuture()
 }

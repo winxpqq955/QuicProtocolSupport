@@ -40,7 +40,7 @@ public abstract class MinecraftDedicatedServerMixin extends MinecraftServer {
 	@Inject(method = "setupServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerNetworkIo;bind(Ljava/net/InetAddress;I)V", shift = At.Shift.AFTER))
 	private void setupServer(CallbackInfoReturnable<Boolean> callbackInfoReturnable) throws IOException {
 		var quicPort = ((QuicServerProperties) getProperties()).getQuicPort();
-		if (quicPort != -1) {
+		if (quicPort > 0) {
 			LOGGER.info("Starting Minecraft server (QUIC) on {}:{}", getServerIp().isEmpty() ? "*" : getServerIp(), quicPort);
 
 			var networkIo = (ServerNetworkIoAccessor) getNetworkIo();

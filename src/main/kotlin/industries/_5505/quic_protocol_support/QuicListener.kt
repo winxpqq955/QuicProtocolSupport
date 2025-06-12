@@ -57,11 +57,10 @@ fun startQuicListener(
 		.initialMaxData(MAX_DATA)
 		.initialMaxStreamsBidirectional(1)
 		.initialMaxStreamDataBidirectionalRemote(MAX_DATA)
-		.congestionControlAlgorithm(QuicCongestionControlAlgorithm.CUBIC)
-		.maxSendUdpPayloadSize(1350)
-		.activeMigration(false)
+		.congestionControlAlgorithm(QuicCongestionControlAlgorithm.BBR2)
 		.tokenHandler(Blake3TokenHandler(ByteArray(32).apply(SecureRandom()::nextBytes)))
 		.connectionIdAddressGenerator(Blake3ConnectionIdGenerator(ByteArray(32).apply(SecureRandom()::nextBytes)))
+		.resetTokenGenerator(QuicResetTokenGenerator.signGenerator())
 		.handler(object : ChannelInboundHandlerAdapter() {
 			override fun userEventTriggered(context: ChannelHandlerContext, event: Any) {
 				if (event is QuicPathEvent.New || event is QuicPathEvent.PeerMigrated) {
