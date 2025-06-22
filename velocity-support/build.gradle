@@ -3,6 +3,7 @@ plugins {
     id 'eclipse'
     id 'org.jetbrains.gradle.plugin.idea-ext' version '1.1.8'
     id("xyz.jpenilla.run-velocity") version "2.3.1"
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group = 'me.ho3'
@@ -37,12 +38,12 @@ dependencies {
     compileOnly("io.netty:netty-transport:4.1.100.Final")
     compileOnly("io.netty:netty-common:4.1.100.Final")
     compileOnly("io.netty:netty-buffer:4.1.100.Final")
-    compileOnly("io.netty:netty-codec:4.1.100.Final")
+	compileOnly("io.netty:netty-codec:4.1.100.Final")
 
 	implementation("io.netty.incubator:netty-incubator-codec-classes-quic:0.0.73.Final-SNAPSHOT")
-	runtimeOnly("io.netty.incubator:netty-incubator-codec-native-quic:0.0.73.Final-SNAPSHOT:windows-x86_64")
-	runtimeOnly("io.netty.incubator:netty-incubator-codec-native-quic:0.0.73.Final-SNAPSHOT:linux-x86_64")
-	runtimeOnly("io.netty.incubator:netty-incubator-codec-native-quic:0.0.73.Final-SNAPSHOT:linux-aarch_64")
+	implementation("io.netty.incubator:netty-incubator-codec-native-quic:0.0.73.Final-SNAPSHOT:windows-x86_64")
+	implementation("io.netty.incubator:netty-incubator-codec-native-quic:0.0.73.Final-SNAPSHOT:linux-x86_64")
+	implementation("io.netty.incubator:netty-incubator-codec-native-quic:0.0.73.Final-SNAPSHOT:linux-aarch_64")
 
 	implementation("commons-codec:commons-codec:1.18.0")
 }
@@ -53,6 +54,24 @@ tasks {
     // This is the only required configuration besides applying the plugin.
     // Your plugin's jar (or shadowJar if present) will be used automatically.
     velocityVersion("3.4.0-SNAPSHOT")
+  }
+
+  shadowJar {
+	  exclude("io/netty/bootstrap/**")
+	  exclude("io/netty/channel/**")
+	  exclude("io/netty/handler/**")
+	  exclude("io/netty/buffer/**")
+	  exclude("io/netty/resolver/**")
+	  exclude("io/netty/handler/**")
+	  exclude("io/netty/util/**")
+	  relocate 'io.netty.incubator.codec.quic', 'relocated.io.netty.incubator.codec.quic'
+	  relocate 'org.apache.commons.codec', 'relocated.org.apache.commons.codec'
+	  mergeServiceFiles()
+	  archiveClassifier.set('')
+  }
+
+  build {
+    dependsOn(shadowJar)
   }
 }
 
