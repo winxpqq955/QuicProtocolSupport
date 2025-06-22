@@ -1,0 +1,67 @@
+plugins {
+    id 'java'
+    id 'eclipse'
+    id 'org.jetbrains.gradle.plugin.idea-ext' version '1.1.8'
+    id("xyz.jpenilla.run-velocity") version "2.3.1"
+}
+
+group = 'me.ho3'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven {
+        name = "papermc-repo"
+        url = "https://repo.papermc.io/repository/maven-public/"
+    }
+    maven {
+        name = "sonatype"
+        url = "https://oss.sonatype.org/content/groups/public/"
+    }
+    // Maven Central snapshots repository for QUIC
+    maven {
+        name = "sonatype-snapshots"
+        url = "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    // Local libs directory for QUIC JARs
+    flatDir {
+        dirs '../libs'
+    }
+}
+
+dependencies {
+    compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
+    annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
+
+    // Netty core dependencies (provided by Velocity, but needed for compilation)
+    compileOnly("io.netty:netty-transport:4.1.100.Final")
+    compileOnly("io.netty:netty-common:4.1.100.Final")
+    compileOnly("io.netty:netty-buffer:4.1.100.Final")
+    compileOnly("io.netty:netty-codec:4.1.100.Final")
+
+	implementation("io.netty.incubator:netty-incubator-codec-classes-quic:0.0.73.Final-SNAPSHOT")
+	runtimeOnly("io.netty.incubator:netty-incubator-codec-native-quic:0.0.73.Final-SNAPSHOT:windows-x86_64")
+	runtimeOnly("io.netty.incubator:netty-incubator-codec-native-quic:0.0.73.Final-SNAPSHOT:linux-x86_64")
+	runtimeOnly("io.netty.incubator:netty-incubator-codec-native-quic:0.0.73.Final-SNAPSHOT:linux-aarch_64")
+
+	implementation("commons-codec:commons-codec:1.18.0")
+}
+
+tasks {
+  runVelocity {
+    // Configure the Velocity version for our task.
+    // This is the only required configuration besides applying the plugin.
+    // Your plugin's jar (or shadowJar if present) will be used automatically.
+    velocityVersion("3.4.0-SNAPSHOT")
+  }
+}
+
+def targetJavaVersion = 17
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release.set(targetJavaVersion)
+}

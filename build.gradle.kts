@@ -48,6 +48,7 @@ dependencies {
 	for (classifier in arrayOf("linux-aarch_64", "linux-x86_64", "windows-x86_64")) {
 		include("io.netty.incubator:netty-incubator-codec-native-quic:${project.property("netty_quic_version")}:${classifier}")
 	}
+
 	runtimeOnly("io.netty.incubator:netty-incubator-codec-native-quic:${project.property("netty_quic_version")}:windows-x86_64")
 	// hashing
 	include("commons-codec:commons-codec:${project.property("commons_codec_version")}")
